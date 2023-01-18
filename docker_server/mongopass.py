@@ -1,1 +1,0 @@
-mongopass = "mongodb://admin:<root>@ac-crzidn8-shard-00-00.rsbrxww.mongodb.net:27017,ac-crzidn8-shard-00-01.rsbrxww.mongodb.net:27017,ac-crzidn8-shard-00-02.rsbrxww.mongodb.net:27017/?ssl=true&replicaSet=atlas-e2g3j4-shard-0&authSource=admin&retryWrites=true&w=majority"

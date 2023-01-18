@@ -1,15 +1,14 @@
 from flask import Flask, render_template, request
 import subprocess as sp
 from pymongo import MongoClient
-from mongopass import mongopass
 
 app = Flask(__name__)
 
 
-client = MongoClient("mongodb+srv://admin:<password>@cluster0.rsbrxww.mongodb.net/?ssl=true&ssl_cert_reqs=CERT_NONE")
+client = MongoClient("mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority")
 db = client.test
 
-myCollection = db.cluster0
+myCollection = db.test
 
 @app.route("/")
 def my_home():
