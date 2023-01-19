@@ -11,7 +11,7 @@ def users():
     cursor.execute("SELECT * FROM user")
     
     rows = cursor.fetchall()
-    
+    #newcomment
     resp = jsonify(rows)
     resp.status_code = 200
     
