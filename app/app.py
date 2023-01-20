@@ -1,53 +1,44 @@
-import os
-from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pymongo import MongoClient
+from datetime import date,datetime
+import pytz
 
-application = Flask(__name__)
 
-application.config["MONGO_URI"] = 'mongodb://' + os.environ['MONGODB_USERNAME'] + ':' + os.environ['MONGODB_PASSWORD'] + '@' + os.environ['MONGODB_HOSTNAME'] + ':27017/' + os.environ['MONGODB_DATABASE']
+try:
+    client = MongoClient(
+        "mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority")
+    print("Connected successfully!!!")
+except:
+    print("Could not connect to MongoDB")
+db = client.test
 
-mongo = PyMongo(application)
-db = mongo.db
+collection = db.test
+Request = None
+MyFile = None
 
-@application.route('/')
-def index():
-    return jsonify(
-        status=True,
-        message='Welcome to the Dockerized Flask MongoDB app!'
-    )
 
-@application.route('/todo')
-def todo():
-    _todos = db.todo.find()
+class RequestHandler_httpd(BaseHTTPRequestHandler):
+    def do_GET(self):
+        global Request, MyFile
+        messagetosend = bytes('Welcome!', "utf")
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/plain')
+        self.send_header('Content-Length', len(messagetosend))
+        self.end_headers()
+        self.wfile.write(messagetosend)
+        Request = self.requestline
+        Request = Request[5: int(len(Request)-9)]
+        print('Your request is:')
+        print(Request)
+        now = datetime.now(pytz.timezone('Asia/Kolkata'))
+        d1 = now.strftime("%d/%m/%Y")
+        current_time = now.strftime("%H:%M:%S")
+        rec1 = { "Name": Request,"Time":current_time,"Date":d1}
+        collection.insert_one(rec1)
+        return
 
-    item = {}
-    data = []
-    for todo in _todos:
-        item = {
-            'id': str(todo['_id']),
-            'todo': todo['todo']
-        }
-        data.append(item)
 
-    return jsonify(
-        status=True,
-        data=data
-    )
-
-@application.route('/todo', methods=['POST'])
-def createTodo():
-    data = request.get_json(force=True)
-    item = {
-        'todo': data['todo']
-    }
-    db.todo.insert_one(item)
-
-    return jsonify(
-        status=True,
-        message='To-do saved successfully!'
-    ), 201
-
-if __name__ == "__main__":
-    ENVIRONMENT_DEBUG = os.environ.get("APP_DEBUG", True)
-    ENVIRONMENT_PORT = os.environ.get("APP_PORT", 5000)
-    application.run(host='0.0.0.0', port=ENVIRONMENT_PORT, debug=ENVIRONMENT_DEBUG)
+print('Starting server ...')
+server_address_httpd = ('', 8080)
+httpd = HTTPServer(server_address_httpd, RequestHandler_httpd)
+httpd.serve_forever()
