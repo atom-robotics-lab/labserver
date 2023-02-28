@@ -2,8 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pymongo import MongoClient
 from datetime import date,datetime
 import pytz
-
-
+from gui import GUI
 try:
     client = MongoClient(
         "mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority")
@@ -15,7 +14,6 @@ db = client.test
 collection = db.test
 Request = None
 MyFile = None
-
 
 class RequestHandler_httpd(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -38,7 +36,21 @@ class RequestHandler_httpd(BaseHTTPRequestHandler):
         return
 
 
-print('Starting server ...')
-server_address_httpd = ('', 8080)
-httpd = HTTPServer(server_address_httpd, RequestHandler_httpd)
-httpd.serve_forever()
+
+import multiprocessing
+
+def function1():
+    print('Starting server ...')
+    server_address_httpd = ('', 8080)
+    httpd = HTTPServer(server_address_httpd, RequestHandler_httpd)
+    httpd.serve_forever()
+
+def function2():
+    GUI()
+
+if __name__ == "__main__":
+    process1 = multiprocessing.Process(target=function1)
+    process2 = multiprocessing.Process(target=function2)
+
+    process1.start()
+    process2.start()
