@@ -1,0 +1,19 @@
+{% extends "template.html" %}
+ 
+{% block body %}
+
+<div style="    margin-right: 256px;
+    margin-left: -163px;">     
+<form action="" method="post">
+   <div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon1">Date</span>
+  </div>
+  <input type="text" class="form-control" placeholder="YYYY-MM-DD" name="date">
+</div>
+    <input style="margin-left: 284px;" class="btn btn-primary" type="submit" name="submit">
+</form>
+<span>{{msg}}</span>
+</div>
+   
+{% endblock %}
