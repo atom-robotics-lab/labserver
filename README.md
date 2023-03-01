@@ -37,6 +37,10 @@ export DISPLAY=$DISPLAY
 docker-compose up 
 ```
 
+OR
+
+```bash
+./up.sh```
 
 ## Benefits
 
