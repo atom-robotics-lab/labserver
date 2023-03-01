@@ -40,7 +40,8 @@ docker-compose up
 OR
 
 ```bash
-./up.sh```
+./up.sh
+```
 
 ## Benefits
 
