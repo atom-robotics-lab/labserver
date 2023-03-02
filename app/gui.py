@@ -284,7 +284,7 @@ class GUI:
                 # with open(filename,"a+",newline="") as f:
                 #     reader=csv.reader(f)
                 #     ids=[row[0] for row in reader]
-                query = {"Name": self.name.get()}
+                query = {"Name": self.name.get().upper()}
                 result = collection2a.find_one(query)
                 if result:
                     card_no = result["Card ID"]
@@ -297,7 +297,7 @@ class GUI:
                         card_no = "ATM"+str(secure_random.randint(100, 999))
                         result2 = collection2a.find_one(query2)
                     rec = {"Card ID": card_no, "Name": self.name.get(
-                    ), "Number": self.num.get(), "Mail": self.mail.get()}
+                    ).upper(), "Number": self.num.get(), "Mail": self.mail.get()}
                     collectiona.insert_one(rec)
                     # self.add_records(rec)
                 self.send(card_no)
