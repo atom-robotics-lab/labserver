@@ -4,9 +4,6 @@ from pymongo import MongoClient
 from datetime import date, datetime
 import pytz
 from gui import GUI
-import serial
-arduino = serial.Serial(port='/dev/ttyUSB0', baudrate=9600)
-
 try:
     client = MongoClient(
         "mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority", connect=False)
@@ -23,12 +20,6 @@ MyFile = None
 class RequestHandler_httpd(BaseHTTPRequestHandler):
     def do_GET(self):
         global Request, MyFile
-        messagetosend = bytes('Welcome!', "utf")
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/plain')
-        self.send_header('Content-Length', len(messagetosend))
-        self.end_headers()
-        self.wfile.write(messagetosend)
         Request = self.requestline
         Request = Request[5: int(len(Request)-9)]
         print('Your card number is:')
@@ -36,7 +27,7 @@ class RequestHandler_httpd(BaseHTTPRequestHandler):
         query = {"Card ID": Request}
         result = collection2.find_one(query)
         if result:
-            arduino.write(bytes("Marked","utf-8"))
+            messagetosend = bytes('Marked', "utf")
             print("Atom Member")
             now = datetime.now(pytz.timezone('Asia/Kolkata'))
             d1 = now.strftime("%d/%m/%Y")
@@ -45,9 +36,9 @@ class RequestHandler_httpd(BaseHTTPRequestHandler):
                     "Name": result["Name"], "Time": current_time, "Date": d1}
             collection.insert_one(rec1)
         else:
-            arduino.write(bytes("NotMarked","utf-8"))
+            messagetosend = bytes('NotMarked', "utf")
             print("Not an Atom Member")
-
+        self.wfile.write(messagetosend)
         return
 
 
