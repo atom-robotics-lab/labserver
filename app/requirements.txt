@@ -1,6 +1,0 @@
-pymongo
-pytz
-tk
-Pillow
-pyserial
-matplotlib
