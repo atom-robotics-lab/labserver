@@ -48,10 +48,10 @@ void setup()
 
 void loop()
 { StringVariable = "";
-  digitalWrite(4,LOW);
-  digitalWrite(2,LOW);
   digitalWrite(22,LOW);
-  digitalWrite(15,LOW);
+  digitalWrite(2,LOW);
+  digitalWrite(4,HIGH);
+  digitalWrite(15,HIGH);
   for (byte i = 0; i < 6; i++)
   {
     key.keyByte[i] = 0xFF;
@@ -63,12 +63,17 @@ void loop()
   if ( ! mfrc522.PICC_ReadCardSerial())
   {
     return;
-  }if (client.connect("192.168.1.2", 8080)) {
+  }
+  digitalWrite(4,LOW);
+  digitalWrite(15,LOW);
+  delay(1000);
+  if (client.connect("192.168.1.2", 8080)) {
       String m=IotClientSendWithAnswer("192.168.1.2","Done");
       if (m!="NULL" && m!="Client Timeout!"){digitalWrite(22,HIGH);
     m.getBytes(blockData, 16);
     Serial.println("Writing to Data Block...");
-    WriteDataToBlock(blockNum, blockData);}
+    WriteDataToBlock(blockNum, blockData);
+    loop();}
     }
   Serial.print("Hello");
   ReadDataFromBlock(blockNum, readBlockData);
@@ -88,7 +93,7 @@ void loop()
     delay(1000);
     Serial.flush();
     }
-  }  
+  }
   delay(1000);
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
