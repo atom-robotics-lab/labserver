@@ -1,6 +1,9 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <WiFi.h>
+#include <ESP32Servo.h>
+Servo myservo;
+int pos = 0;   
 long  i;
 String  StringVariable;
 WiFiClient client;
@@ -13,7 +16,7 @@ String IotClientSendWithAnswer(String IPcache, String monmessagecache) {
                "Connection: close\r\n\r\n");
   unsigned long timeout = millis();
   while (client.available() == 0) {
-    if (millis() - timeout > 2000) {
+    if (millis() - timeout > 1000) {
       return "Client Timeout!";
     }
   }
@@ -32,14 +35,15 @@ byte blockData[16] = { "Name" };
 MFRC522::StatusCode status;
 
 void setup()
-{ pinMode(4,OUTPUT);
-  pinMode(2,OUTPUT);
-  pinMode(22,OUTPUT);
-  pinMode(15,OUTPUT);
+{ pinMode(4,OUTPUT);//yellow
+  pinMode(2,OUTPUT);//red
+  pinMode(22,OUTPUT);//blue
+  pinMode(15,OUTPUT);//green
+  myservo.attach(13);
   StringVariable = "";
   Serial.begin(9600);
-  //WiFi.begin("A.T.O.M_LABS", "Atom281121");
-  WiFi.begin("HRHK", "Ha9868598102@");
+  WiFi.begin("A.T.O.M_LABS", "Atom281121");
+  //WiFi.begin("HRHK", "Ha9868598102@");
   while ((!(WiFi.status() == WL_CONNECTED))) {
   }
   SPI.begin();
@@ -51,7 +55,8 @@ void loop()
   digitalWrite(22,LOW);
   digitalWrite(2,LOW);
   digitalWrite(4,HIGH);
-  digitalWrite(15,HIGH);
+  digitalWrite(15,LOW);
+  myservo.write(0);              
   for (byte i = 0; i < 6; i++)
   {
     key.keyByte[i] = 0xFF;
@@ -66,34 +71,31 @@ void loop()
   }
   digitalWrite(4,LOW);
   digitalWrite(15,LOW);
-  delay(1000);
-  if (client.connect("192.168.1.2", 8080)) {
-      String m=IotClientSendWithAnswer("192.168.1.2","Done");
+  ReadDataFromBlock(blockNum, readBlockData);
+  for (int j = 0 ; j < 16 ; j++)
+  { StringVariable = StringVariable + String((char)readBlockData[j]);
+    Serial.write(readBlockData[j]);
+  }
+  if (client.connect("192.168.0.119", 8000)) {
+    String m=IotClientSendWithAnswer("192.168.0.119", StringVariable);
+    if (m=="Marked"){  
+    digitalWrite(15,HIGH);
+    myservo.write(90);              
+    delay(1000);
+  }
+  else if(m=="NotMarked"){
+    digitalWrite(2,HIGH);
+    delay(1000);
+    }
+  }
+  if (client.connect("192.168.0.119", 8080)) {
+      String m=IotClientSendWithAnswer("192.168.0.119","Done");
       if (m!="NULL" && m!="Client Timeout!"){digitalWrite(22,HIGH);
     m.getBytes(blockData, 16);
     Serial.println("Writing to Data Block...");
     WriteDataToBlock(blockNum, blockData);
     loop();}
     }
-  Serial.print("Hello");
-  ReadDataFromBlock(blockNum, readBlockData);
-  for (int j = 0 ; j < 16 ; j++)
-  { StringVariable = StringVariable + String((char)readBlockData[j]);
-    Serial.write(readBlockData[j]);
-  }
-  if (client.connect("192.168.1.2", 8000)) {
-    String m=IotClientSendWithAnswer("192.168.1.2", StringVariable);
-    if (m=="Marked"){  
-    digitalWrite(15,HIGH);
-    delay(1000);
-    Serial.flush();
-  }
-  else if(m=="NotMarked"){
-    digitalWrite(2,HIGH);
-    delay(1000);
-    Serial.flush();
-    }
-  }
   delay(1000);
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
