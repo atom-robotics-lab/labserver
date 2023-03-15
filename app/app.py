@@ -13,13 +13,16 @@ import matplotlib
 try:
     client = MongoClient(
         "mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority")
+    local_client = MongoClient("mongodb://admin:admin@localhost:27017/")
     print("Connected successfully to MongoDB")
 except:
     print("Could not connect to MongoDB")
 
 matplotlib.use('Agg')
 db = client.test
+local_db = local_client['atom']
 collection2 = db.cardinfo
+local_collection = local_db.cardinfo
 collection = db.test
 Request = None
 MyFile = None
@@ -273,6 +276,7 @@ class GUI:
                     rec = {"Card ID": card_no, "Name": self.name.get(
                     ).upper(), "Number": self.num.get(), "Mail": self.mail.get()}
                     collection2.insert_one(rec)
+                    local_collection.insert_one(rec)
                 record=[card_no]
                 self.add_records(record)
                 print(
@@ -415,7 +419,11 @@ class RequestHandler_httpd2(BaseHTTPRequestHandler):
         Request = Request[5: int(len(Request)-9)]
         print('Your card number is:',Request)
         query = {"Card ID": Request}
-        result = collection2.find_one(query)
+        try:
+            result = collection2.find_one(query)
+        except:
+            result = local_collection.find_one(query)
+            
         if result:
             messagetosend = bytes('Marked', "utf-8")
             print("Atom Member")

@@ -10,6 +10,9 @@ app.config['SECRET_KEY'] = '8424276c875d016a'
 client = MongoClient("mongodb+srv://admin:admin@cluster0.wjyhg76.mongodb.net/?retryWrites=true&w=majority")
 db = client['online_attendence']
 
+
+
+
 time = datetime.date.today()
 tname = ''
 sname = ''
@@ -20,9 +23,11 @@ def this():
 	if request.method == 'POST':
 		if request.form['choice'] == 'teacher':
 			collection = db.teacher
+			local_collection = local_db.teacher
 			collection.insert_one({'username':request.form['username'], 'password':request.form['password']})
 		elif request.form['choice'] == 'student':
 			collection = db.student
+			local_collection = local_db.student
 			collection.insert_one({'username':request.form['username'], 'password':request.form['password']})
 		return redirect(url_for('login'))
 
