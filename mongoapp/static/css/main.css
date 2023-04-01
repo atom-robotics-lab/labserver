@@ -1,7 +1,7 @@
 body{
     background-color: rgb(210, 218, 226);
 }
-
+*{text-align: center;}
 #home{
 	background-color: white;
     color: black;
