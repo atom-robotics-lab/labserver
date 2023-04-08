@@ -12,15 +12,15 @@ import matplotlib
 
 try:
     client = MongoClient(
-        "mongodb+srv://admin:root@cluster0.rsbrxww.mongodb.net/?retryWrites=true&w=majority")
+        "mongodb+srv://admin:admin@cluster0.cvhcbeg.mongodb.net/?retryWrites=true&w=majority")
     print("Connected successfully to MongoDB")
 except:
     print("Could not connect to MongoDB")
 
 matplotlib.use('Agg')
-db = client.test
+db = client.attendence
 collection2 = db.cardinfo
-collection = db.test
+collection = db.admin
 Request = None
 MyFile = None
 teal = "#2b6969"
@@ -339,12 +339,17 @@ class GUI:
             self.del_grid()
 
         else:
-            if (self.card_num.get() == ""):
+            if (self.name.get() == ""):
 
                 self.card_frame2.grid_forget()
                 self.del_grid_visible = False
             else:
-                print(f"Card number: {self.card_num.get()}")
+                card_no="delete"
+                record=[card_no]
+                self.add_records(record)
+                print(f"Name: {self.name.get()}")
+                #rec= {"Card ID": None, "Name": None, "Number": None, "Mail": None}
+                collection2.delete_one({"Name":self.name.get().upper()})
 
     def del_grid(self):
         self.del_grid_visible = True
@@ -360,16 +365,16 @@ class GUI:
         # Label
         tk.Label(
             self.card_frame2,
-            text='Card num:',
+            text='Name:',
             bg=teal, fg="white",
             font=("TkMenuFont", 14)).grid(row=0, column=0, padx=5)
 
         # Text fields
-        self.card_num = tk.Entry(self.card_frame2)
-        self.card_num.grid(row=0,
-                           column=1,
-                           padx=5,
-                           pady=5)
+        self.name = tk.Entry(self.card_frame2)
+        self.name.grid(row=0,
+                        column=1,
+                        padx=5,
+                        pady=5)
 
     def pass_visi(self):
         if self.check_var.get() == 1:

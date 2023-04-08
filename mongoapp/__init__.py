@@ -6,8 +6,8 @@ import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8424276c875d016a'
 client = MongoClient(
-    "mongodb+srv://admin:admin@cluster0.wjyhg76.mongodb.net/?retryWrites=true&w=majority")
-db = client['online_attendence']
+    "mongodb+srv://admin:admin@cluster0.cvhcbeg.mongodb.net/?retryWrites=true&w=majority")
+db = client['attendence']
 
 time = datetime.date.today()
 tname = ''
@@ -18,7 +18,7 @@ d = []
 @app.route('/', methods=['POST', 'GET'])
 def login_in():
     if request.method == 'POST':
-        data = db.teacher
+        data = db.login
         find = data.find_one({'username': request.form['username']})
         if find:
             authu = find['username']
@@ -48,7 +48,7 @@ def index(tname):
 def search(tname):
     if request.method == 'POST':
         data = db[tname]
-        find = data.find({'student': request.form['search']})
+        find = data.find({'Name': request.form['search'].upper()})
         msg = ''
         return render_template('search_2.html', search=find, tname=tname, msg=msg)
     print(tname)
