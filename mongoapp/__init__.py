@@ -49,8 +49,9 @@ def search(tname):
     if request.method == 'POST':
         data = db[tname]
         find = data.find({'Name': request.form['search'].upper()})
+        count = data.count_documents({'Name': request.form['search'].upper()})
         msg = ''
-        return render_template('search_2.html', search=find, tname=tname, msg=msg)
+        return render_template('search_2.html', search=find, tname=tname, msg=msg,count=count)
     print(tname)
     return render_template('search.html')
 
