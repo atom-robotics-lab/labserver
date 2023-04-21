@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
 from pymongo import MongoClient
 import datetime
-
+from statistics import mean, mode
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8424276c875d016a'
@@ -49,9 +49,14 @@ def search(tname):
     if request.method == 'POST':
         data = db[tname]
         find = data.find({'Name': request.form['search'].upper()})
+        find_time = data.find({'Name': request.form['search'].upper()})
         count = data.count_documents({'Name': request.form['search'].upper()})
         msg = ''
-        return render_template('search_2.html', search=find, tname=tname, msg=msg,count=count)
+        time = [int((x['Time']).replace(':','')) for x in find_time]
+        avg_time = str(int(mean(time)))
+        avg_time = avg_time[:2]+":"+avg_time[2:4]+":"+avg_time[4:]
+        print(f"Average time: {avg_time}")
+        return render_template('search_2.html', search=find, tname=tname, msg=msg,count=count, avg_time=avg_time)
     print(tname)
     return render_template('search.html')
 
