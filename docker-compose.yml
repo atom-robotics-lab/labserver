@@ -13,8 +13,8 @@ services:
   mongoapp:
     build: ./mongoapp
     command: python -u __init__.py
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
     volumes:
       - ./mongoapp:/mongoapp
     network_mode: "host"
