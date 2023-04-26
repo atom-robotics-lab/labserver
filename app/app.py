@@ -34,7 +34,6 @@ username = "admin"
 passwd = "Atom281121"
 multiplier = .4
 secure_random = secrets.SystemRandom()
-
 class GUI:
     
     def __init__(self):
@@ -83,14 +82,32 @@ class GUI:
             padx=50,
             fill=tk.BOTH)
         # expand=True)
+        
+        # Frame 3 creation
+        self.frame3 = tk.Frame(
+            self.screen1,
+            width=str(400*multiplier),
+            height=str(650*multiplier),
+            bg=teal)
+
+        self.frame3.pack(
+            pady=50,
+            padx=50,
+            fill=tk.BOTH)
 
         self.login_screen()
-        # self.card_screen()
+        #self.card_screen()
+        #self.record_screen()
 
         self.screen1.mainloop()
 
     def login_screen(self):
-        # Display Frame1
+        #Remove frames 2 and 3
+        self.frame2.pack_forget()
+        self.frame3.pack_forget()
+        
+        # Display Frame 3
+        self.frame1.pack(pady=50,padx=40,fill=tk.BOTH)
         self.frame1.tkraise()
         self.frame1.pack_propagate(False)
 
@@ -170,9 +187,15 @@ class GUI:
             command=lambda: self.pwd_chk()).grid(row=2, pady=10, padx=25)
 
     def card_screen(self):
-        # remove Frame 1
+        print("Card screen")
+        # remove Frame 1 and 3
         self.frame1.pack_forget()
+        self.frame3.pack_forget()
+        
+        self.frame2.pack(pady=50,padx=50,fill=tk.BOTH)
         self.frame2.tkraise()
+        self.frame2.pack_propagate(False)
+        
         self.add_grid_visible = False
         self.del_grid_visible = False
 
@@ -237,6 +260,37 @@ class GUI:
             bg=teal,
             fg="white",
             font=("TkMenuFont", 16)).grid(row=1, column=1, padx=5)
+        
+        #Records button
+        show_records_button = tk.Button(self.frame2, text="Show Records", command=lambda: self.record_screen())
+        show_records_button.grid(row=2, column=0, pady=150)
+
+
+    def record_screen(self):
+        print("Records")
+        # remove Frame 1 and 2
+        self.frame1.pack_forget()
+        self.frame2.pack_forget()
+        
+        self.frame3.pack(pady=50,padx=50,fill=tk.BOTH)
+        self.frame3.tkraise()
+        self.frame3.pack_propagate(False)
+        
+        self.add_grid_visible = False
+        self.del_grid_visible = False
+        
+        #Listbox for the records
+        records_listbox = tk.Listbox(self.frame3, width=100, bg=teal, fg=light_teal, highlightthickness=0, relief="flat")
+        records_listbox.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+
+        #Add records
+        records = collection2.find()
+        for record in records:
+            records_listbox.insert(tk.END, f"{record['Name']}: {record['Card ID']}")
+
+        #Button for prev
+        back_button = tk.Button(self.frame3, text="Back", command=lambda: self.card_screen())
+        back_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
     def add_func(self):
         global card_no
@@ -344,12 +398,9 @@ class GUI:
                 self.card_frame2.grid_forget()
                 self.del_grid_visible = False
             else:
-                card_no="delete"
-                record=[card_no]
-                self.add_records(record)
                 print(f"Name: {self.name.get()}")
                 #rec= {"Card ID": None, "Name": None, "Number": None, "Mail": None}
-                collection2.delete_one({"Name":self.name.get().upper()})
+                collection2.deleteOne({"Name":self.name.get()})
 
     def del_grid(self):
         self.del_grid_visible = True
