@@ -106,7 +106,7 @@ class GUI:
         self.frame2.pack_forget()
         self.frame3.pack_forget()
         
-        # Display Frame 3
+        # Display Frame 1
         self.frame1.pack(pady=50,padx=40,fill=tk.BOTH)
         self.frame1.tkraise()
         self.frame1.pack_propagate(False)
@@ -281,17 +281,22 @@ class GUI:
         
         #Listbox for the records
         records_listbox = tk.Listbox(self.frame3, width=100, bg=teal, fg=light_teal, highlightthickness=0, relief="flat")
-        records_listbox.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
-
+        records_listbox.grid(row=0, column=0, padx=30, pady=30, sticky="nsew")
+        
         #Add records
         records = collection2.find()
         for record in records:
             records_listbox.insert(tk.END, f"{record['Name']}: {record['Card ID']}")
-
-        #Button for prev
+        
         back_button = tk.Button(self.frame3, text="Back", command=lambda: self.card_screen())
-        back_button.pack(side=tk.BOTTOM, padx=10, pady=10)
+        back_button.grid(row=1, column=0, padx=10, pady=10, sticky="s")
+        back_button.lift()
+        
+        self.frame3.grid_rowconfigure(0, weight=1)
+        self.frame3.grid_columnconfigure(0, weight=1)
 
+
+        
     def add_func(self):
         global card_no
         # Check and remove delete grid
