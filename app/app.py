@@ -34,6 +34,7 @@ username = "admin"
 passwd = "Atom281121"
 multiplier = .4
 secure_random = secrets.SystemRandom()
+
 class GUI:
     
     def __init__(self):
@@ -333,6 +334,9 @@ class GUI:
                     ).upper(), "Number": self.num.get(), "Mail": self.mail.get()}
                     collection2.insert_one(rec)
                 record=[card_no]
+                with open(filename,"w",newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(card_no)
                 self.add_records(record)
                 print(
                     f"Name: {self.name.get()} \nPhone number: {self.num.get()} \nMail: {self.mail.get()} \nCard num: {card_no}")
@@ -405,7 +409,10 @@ class GUI:
             else:
                 print(f"Name: {self.name.get()}")
                 #rec= {"Card ID": None, "Name": None, "Number": None, "Mail": None}
-                collection2.deleteOne({"Name":self.name.get()})
+                collection2.delete_one({"Name":self.name.get()})
+                with open(filename,"w",newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["DELATM"])
 
     def del_grid(self):
         self.del_grid_visible = True
