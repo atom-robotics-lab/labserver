@@ -160,56 +160,57 @@ This is an example of how to list things you need to use the software and how to
    ./up.sh
    ```
 
-   explain what the script is doing
-
+3. Here up.sh run the following things:
+   * Firstly it run the espcode which is used to connect the esp to rfid over wifi and send to the database to mongodb
+   * Then it launches a GUI which enables the admin to issue a card, delete a card or check records of the issued cards
+   * Finally it launches the Flask server which enables the admin to access information like name, usual time of entrance etc. through a webpage
+   
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Lab Attendance Server
+<!-- USAGE EXAMPLES -->
+## Usage
 
-RFID (Radio Frequency Identification) based attendance systems are commonly used in various industries to track employee attendance and timekeeping. When integrated with Docker, it can provide a flexible and scalable solution for managing attendance data and analytics.
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-Docker is a containerization platform that allows developers to create, deploy, and run applications in containers. Containers are lightweight and portable, making it easier to run applications across different environments. With Docker, RFID based attendance systems can be deployed as containers, which can be easily replicated and managed across different servers and environments.
+- The `espcode` dir contains all the code which helps in the connection of esp and rfid.
+- The `app` dir contains all the GUI.
+- The `mongoapp` dir contains all the files for running the Flask server.
 
-Here are some key features and benefits of deploying RFID based attendance system on Docker:
+<center><img src="images/GUI.png" height="400" width="900"></center></br></br>
 
+In order to run the simulation you are required to do the following:</br>
 
+* For running the `app`.
 
+  - Switch to the app directory of the repository.
+    ```sh
+    cd /app
+    ```
+  - Make a virtual environment and activate the venv
+    ```sh
+    python3 virtualenv venv
+    ```
+  - Launch the python file.
+    ```sh
+    python3 app.py
+    ```
+    **_NOTE:_** Make sure that you have installed the python dependencies before running the application  file.<br />
 
+  - Installing the dependencies (if not done)
+    ```sh
+    pip install -r requirements.txt --no-cache-dir
+    ```<br /> <br />
 
-## Docker Installation
+  Voila! The GUI will and you can issue the cards now.<br /><br />
 
+* For running `Flask Server`.
 
-flask
+  - Switch to the mongoapp directory.
+    ```sh
+    python3 __init__.py
+    ```
 
-
-
-
-## Deployment
-
-To deploy this project run
-
-
-```bash
-docker-compose build
-```
-```bash
-xhost +si:localuser:$USER
-```
-```bash
-xhost +local:docker
-```
-```bash
-export DISPLAY=$DISPLAY
-```
-```bash
-docker-compose up 
-```
-
-OR
-
-```bash
-./up.sh
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Benefits
 
