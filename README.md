@@ -201,7 +201,7 @@ In order to run the simulation you are required to do the following:</br>
     pip install -r requirements.txt --no-cache-dir
     ```<br /> <br />
 
-  Voila! The GUI will and you can issue the cards now.<br /><br />
+  Voila! The GUI will start and you can issue the cards now.<br /><br />
 
 * For running `Flask Server`.
 
