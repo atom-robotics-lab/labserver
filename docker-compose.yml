@@ -18,3 +18,12 @@ services:
     volumes:
       - ./mongoapp:/mongoapp
     network_mode: "host"
+  
+  discordbot:
+    build: ./discordbot
+    command: python -u discordbot.py
+    volumes:
+      -./discordbot:/discordbot
+    networks_mode: "host"
+      
+    
