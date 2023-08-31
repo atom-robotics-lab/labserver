@@ -1,10 +1,16 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 #include <ESP32Servo.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+const char* ssid = "A.T.O.M_LABS";
+const char* password = "Atom281121";
 
 Servo myservo;
 String name;
@@ -42,11 +48,70 @@ String IotClientSendWithAnswer(String IPcache, String monmessagecache) {
 }
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println("Booting");
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
+    ESP.restart();
+  }
+
+  // Port defaults to 3232
+  // ArduinoOTA.setPort(3232);
+
+  // Hostname defaults to esp3232-[MAC]
+  // ArduinoOTA.setHostname("myesp32");
+
+  // No authentication by default
+  // ArduinoOTA.setPassword("admin");
+
+  // Password can be set with it's md5 value as well
+  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
   pinMode(4, OUTPUT);   //yellow
   pinMode(2, OUTPUT);   //red
   pinMode(27, OUTPUT);  //blue
-  pinMode(15, OUTPUT);  //green
-  myservo.attach(13);
+  pinMode(15, OUTPUT);
+  pinMode(13, OUTPUT); //green
+//  myservo.attach(13);
+
   StringVariable = "";
   Serial.begin(115200);
   SPI.begin();
@@ -57,19 +122,23 @@ void setup() {
       ;
   }
   display.clearDisplay();
-  // WiFi.begin("A.T.O.M_LABS", "Atom281121");
-  WiFi.begin("HRHK", "Ha9868598102@");
+   WiFi.begin("A.T.O.M_LABS", "Atom281121");
+//  WiFi.begin("HRHK", "Ha9868598102@");la  
   while ((!(WiFi.status() == WL_CONNECTED))) {}
+  Serial.println("ESP code setup");
 }
 
 void loop() {
+  ArduinoOTA.handle();
+
   StringVariable = "";
   int ch = 0;
   digitalWrite(27, LOW);
   digitalWrite(2, LOW);
   digitalWrite(4, HIGH);
   digitalWrite(15, LOW);
-  myservo.write(0);
+//  myservo.write(0);
+  digitalWrite(13, LOW);
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(25, 0);
@@ -97,8 +166,8 @@ void loop() {
     StringVariable = StringVariable + String((char)readBlockData[j]);
     Serial.write(readBlockData[j]);
   }
-  if (client.connect("192.168.1.2", 8080)) {
-    String m = IotClientSendWithAnswer("192.168.1.2", "Done");
+  if (client.connect("192.168.0.25", 8080)) {
+    String m = IotClientSendWithAnswer("192.168.0.25", "Done");
     if (m != "NULL" && m != "Client Timeout!") {
       m.getBytes(blockData, 16);
       display.setCursor(0, 40);
@@ -113,21 +182,23 @@ void loop() {
     }
   }
   if (ch != 1) {
-    if (client.connect("192.168.1.2", 8000)) {
+    if (client.connect("192.168.0.25", 8000)) {
 
       display.setCursor(0, 40);
       display.setTextColor(WHITE, BLACK);
       display.setCursor(0, 40);  // Start at top-left corner
       display.print(F(" Checking "));
       display.display();
-      String m = IotClientSendWithAnswer("192.168.1.2", StringVariable);
+      String m = IotClientSendWithAnswer("192.168.0.25", StringVariable);
       if (m == "Marked") {
         digitalWrite(15, HIGH);
-        myservo.write(90);
+//        myservo.write(90);
+        digitalWrite(13,HIGH);
         display.setCursor(0, 40);
         display.setTextColor(WHITE, BLACK);
         display.setCursor(0, 40);  // Start at top-left corner
-        display.print(F("   Member "));
+//        display.print(F("   Member "));
+        display.print(F("oPEN dOOR"));
         display.display();
         delay(500);
       } else if (m == "NotMarked") {
@@ -146,6 +217,7 @@ void loop() {
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
 }
+
 
 void ReadDataFromBlock(int blockNum, byte readBlockData[]) {
   status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, blockNum, &key, &(mfrc522.uid));
