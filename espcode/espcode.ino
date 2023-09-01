@@ -45,8 +45,10 @@ void setup() {
   pinMode(4, OUTPUT);   //yellow
   pinMode(2, OUTPUT);   //red
   pinMode(27, OUTPUT);  //blue
-  pinMode(15, OUTPUT);  //green
-  myservo.attach(13);
+  pinMode(15, OUTPUT);
+  pinMode(13, OUTPUT); //green
+//  myservo.attach(13);
+
   StringVariable = "";
   Serial.begin(115200);
   SPI.begin();
@@ -57,8 +59,8 @@ void setup() {
       ;
   }
   display.clearDisplay();
-  // WiFi.begin("A.T.O.M_LABS", "Atom281121");
-  WiFi.begin("HRHK", "Ha9868598102@");
+   WiFi.begin("A.T.O.M_LABS", "Atom281121");
+//  WiFi.begin("HRHK", "Ha9868598102@");la  
   while ((!(WiFi.status() == WL_CONNECTED))) {}
 }
 
@@ -69,7 +71,8 @@ void loop() {
   digitalWrite(2, LOW);
   digitalWrite(4, HIGH);
   digitalWrite(15, LOW);
-  myservo.write(0);
+//  myservo.write(0);
+  digitalWrite(13, LOW);
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(25, 0);
@@ -97,8 +100,8 @@ void loop() {
     StringVariable = StringVariable + String((char)readBlockData[j]);
     Serial.write(readBlockData[j]);
   }
-  if (client.connect("192.168.1.2", 8080)) {
-    String m = IotClientSendWithAnswer("192.168.1.2", "Done");
+  if (client.connect("192.168.0.22", 8080)) {
+    String m = IotClientSendWithAnswer("192.168.0.22", "Done");
     if (m != "NULL" && m != "Client Timeout!") {
       m.getBytes(blockData, 16);
       display.setCursor(0, 40);
@@ -113,17 +116,18 @@ void loop() {
     }
   }
   if (ch != 1) {
-    if (client.connect("192.168.1.2", 8000)) {
+    if (client.connect("192.168.0.22", 8000)) {
 
       display.setCursor(0, 40);
       display.setTextColor(WHITE, BLACK);
       display.setCursor(0, 40);  // Start at top-left corner
       display.print(F(" Checking "));
       display.display();
-      String m = IotClientSendWithAnswer("192.168.1.2", StringVariable);
+      String m = IotClientSendWithAnswer("192.168.0.22", StringVariable);
       if (m == "Marked") {
         digitalWrite(15, HIGH);
-        myservo.write(90);
+//        myservo.write(90);
+        digitalWrite(13,HIGH);
         display.setCursor(0, 40);
         display.setTextColor(WHITE, BLACK);
         display.setCursor(0, 40);  // Start at top-left corner

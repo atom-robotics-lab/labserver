@@ -23,7 +23,7 @@ services:
     build: ./discordbot
     command: python -u discordbot.py
     volumes:
-      -./discordbot:/discordbot
-    networks_mode: "host"
+      - ./discordbot:/discordbot
+    network_mode: "host"
       
     

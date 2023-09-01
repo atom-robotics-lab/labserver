@@ -3,10 +3,10 @@ FROM python:3.9
 
 # Copy the code into the container
 
-COPY . /discordbot.py
+COPY . /discordbot
 
 # Set the working directory
-WORKDIR /discordbot.py
+WORKDIR /discordbot
 
 # Install dependencies
-RUN pip install discord.py pymongo
+RUN pip install py-cord pymongo

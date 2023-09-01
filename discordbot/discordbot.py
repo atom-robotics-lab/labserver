@@ -1,17 +1,17 @@
+
 import discord
-import pymongo
+from pymongo import MongoClient
 from discord.ext import tasks
 
 # MongoDB connection setup
-mongo_client = pymongo.MongoClient('')
-db_name = ''
-collection_name = ''
-db = mongo_client[db_name]
-collection = db[collection_name]
+client = MongoClient(
+        "mongodb+srv://admin:admin@cluster0.cvhcbeg.mongodb.net/?retryWrites=true&w=majority")
+db = client.attendence
+collection = db.admin
 
 # Discord bot setup
-discord_token = ''
-bot = discord.Client()
+discord_token = 'MTExMzAxMTEwMjM1NjM2MTI3Ng.Gv2SDq.U8LoDm_2cIRnnQAVvu1Je9htCi4ba_mCIBVyd4'
+bot = discord.Client(intents=discord.Intents.default())
 
 # MongoDB change stream setup
 @tasks.loop(seconds=0)
@@ -28,7 +28,7 @@ async def start_change_stream():
 
 # Sending data to Discord
 async def send_to_discord(document):
-    channel_id = 
+    channel_id = 910183289703264307
     channel = bot.get_channel(channel_id)
 
     # Format the document data as desired
