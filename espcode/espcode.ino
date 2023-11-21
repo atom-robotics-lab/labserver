@@ -8,6 +8,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+#include "SPIFFS.h"
+
 
 const char* ssid = "A.T.O.M_Labs";
 const char* password = "atom281121";
@@ -31,24 +33,31 @@ String StringVariable;
 String myurl = "/";
 String line = "";
 
-#define i2c_Address 0x3c 
+#define i2c_Address 0x3c
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define OLED_RESET -1 
+#define OLED_RESET -1
 Adafruit_SH1106G display(128, 64, &Wire, -1);
 
 void setup() {
   Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_STA);  
+  SPI.begin();
   WiFi.begin(ssid, password);
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Connection Failed! Rebooting...");
-    delay(5000);
-    ESP.restart();
+  if (!display.begin(i2c_Address, true)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ;
   }
+  display.clearDisplay();
+  if (WiFi.waitForConnectResult() == WL_CONNECTED) {
+    //    Serial.println("Connection Failed! Rebooting...");
+    //    delay(5000);
+    //    ESP.restart();
+    //  }
 
-  // Initialize other components here
-   ArduinoOTA
+    // Initialize other components here
+    ArduinoOTA
     .onStart([]() {
       String type;
       if (ArduinoOTA.getCommand() == U_FLASH)
@@ -73,18 +82,16 @@ void setup() {
       else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
-  ArduinoOTA.begin();
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  SPI.begin();
-  mfrc522.PCD_Init();
-  if (!display.begin(i2c_Address, true)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;
+    ArduinoOTA.begin();
+    Serial.println("Ready");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
   }
-  display.clearDisplay();
+  if (!SPIFFS.begin(true)) {
+    Serial.println("An error occurred while mounting SPIFFS");
+    return;
+  }
+  mfrc522.PCD_Init();
   pinMode(13, OUTPUT);
 }
 
@@ -92,7 +99,7 @@ void loop() {
   ArduinoOTA.handle();
   StringVariable = "";
   int ch = 0;
-  
+
   // Your main loop logic here
   digitalWrite(13, LOW);
   display.setTextSize(2);
@@ -102,7 +109,7 @@ void loop() {
   display.setCursor(20, 20);
   display.print(F("ROBOTICS"));
   display.setCursor(0, 45);
-  display.setTextColor(SH110X_WHITE, SH110X_BLACK); 
+  display.setTextColor(SH110X_WHITE, SH110X_BLACK);
   display.setCursor(0, 45);
   display.print(F(" Tap Card "));
   display.display();
@@ -115,17 +122,18 @@ void loop() {
   if (!mfrc522.PICC_ReadCardSerial()) {
     return;
   }
-   ReadDataFromBlock(blockNum, readBlockData);
+  ReadDataFromBlock(blockNum, readBlockData);
   for (int j = 0; j < 16; j++) {
     StringVariable = StringVariable + String((char)readBlockData[j]);
-    Serial.write(readBlockData[j]);
+    //    Serial.write(readBlockData/[j]);
   }
+  Serial.println(StringVariable);
   if (client.connect(serverIP, 8080)) {
     String m = IotClientSendWithAnswer(serverIP, "Done");
     if (m != "NULL" && m != "Client Timeout!") {
       m.getBytes(blockData, 16);
       display.setCursor(0, 45);
-        display.setTextColor(SH110X_WHITE, SH110X_BLACK); 
+      display.setTextColor(SH110X_WHITE, SH110X_BLACK);
       display.setCursor(24, 45);  // Start at top-left corner
       display.print(F("Issuing"));
       display.display();
@@ -138,28 +146,60 @@ void loop() {
   if (ch != 1) {
     if (client.connect(serverIP, 8000)) {
       display.setCursor(0, 45);
-        display.setTextColor(SH110X_WHITE, SH110X_BLACK); 
+      display.setTextColor(SH110X_WHITE, SH110X_BLACK);
       display.setCursor(0, 45);  // Start at top-left corner
       display.print(F(" Checking"));
       display.display();
       String m = IotClientSendWithAnswer(serverIP, StringVariable);
       if (m == "Marked") {
-        digitalWrite(13,HIGH);
+        digitalWrite(13, HIGH);
         display.setCursor(0, 45);
-          display.setTextColor(SH110X_WHITE, SH110X_BLACK); 
+        display.setTextColor(SH110X_WHITE, SH110X_BLACK);
         display.setCursor(0, 45);  // Start at top-left corner
-//        display.print(F("Member"));
+        //        display.print(F("Member"));
         display.print(F(" Door Open"));
         display.display();
         delay(500);
       } else if (m == "NotMarked") {
         display.setCursor(0, 45);
-          display.setTextColor(SH110X_WHITE, SH110X_BLACK); 
+        display.setTextColor(SH110X_WHITE, SH110X_BLACK);
         display.setCursor(0, 45);  // Start at top-left corner
         display.print(F("Not Member"));
         display.display();
         delay(500);
       }
+    }
+    else {
+      File file = SPIFFS.open("/labserver.txt", "r");
+      if (!file) {
+        Serial.println("Failed to open file for reading");
+      }
+      display.setCursor(0, 45);
+      display.setTextColor(SH110X_WHITE, SH110X_BLACK);
+      display.setCursor(0, 45);  // Start at top-left corner
+      display.print(F(" Checking"));
+      display.display();
+      while (file.available()) {
+        String line = file.readStringUntil('\n');
+          Serial.println("cardno+" + StringVariable+"'" + "line+'" + line+"'");
+          line.trim();        
+        if (String(StringVariable) == line) {
+          Serial.println("cardno+" + StringVariable+"'" + "line+'" + line+"'");
+
+          digitalWrite(13, HIGH);
+          display.setCursor(0, 45);
+          display.setTextColor(SH110X_WHITE, SH110X_BLACK);
+          display.setCursor(0, 45);  // Start at top-left corner
+          //        display.print(F("Member"));
+          display.print(F(" Door Open"));
+          display.display();
+          delay(500);
+
+        }
+        Serial.println("line" + line);
+      }
+
+      file.close();
     }
   }
 
@@ -192,7 +232,7 @@ void WriteDataToBlock(int blockNum, byte blockData[]) {
     return;
   }
   display.setCursor(0, 40);
-    display.setTextColor(SH110X_WHITE, SH110X_BLACK); ;
+  display.setTextColor(SH110X_WHITE, SH110X_BLACK); ;
   display.setCursor(0, 40);  // Start at top-left corner
   display.print(F("   Issued "));
   display.display();
@@ -200,7 +240,7 @@ void WriteDataToBlock(int blockNum, byte blockData[]) {
   digitalWrite(27, HIGH);
 }
 
-String IotClientSendWithAnswer(String IPcache,String monmessagecache) {
+String IotClientSendWithAnswer(String IPcache, String monmessagecache) {
   // Send HTTP GET request and return the response
   line = "";
   client.print(String("GET ") + myurl + monmessagecache + " HTTP/1.1\r\n" + "Host: " + IPcache + "\r\n" + "Connection: close\r\n\r\n");
